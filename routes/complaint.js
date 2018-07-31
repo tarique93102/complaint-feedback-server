@@ -6,6 +6,7 @@ var Complaint = require('../models/complaint');
 complaintRouter.route('/')
     .get((req, res, next) => {
         Complaint.find({})
+            .populate('user')
             .then((complaint) => {
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
@@ -18,6 +19,7 @@ complaintRouter.route('/')
 complaintRouter.route('/:userId')
     .get((req, res, next) => {
         Complaint.find({ user: req.params.userId })
+            .populate('user')
             .then((complaint) => {
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
@@ -36,7 +38,28 @@ complaintRouter.route('/:userId')
     });
 
 // get - fetch a single complaint for a user
-// put - edit the comment in question
-
+// put - edit the complaint in question
+complaintRouter.route('/agent/:complaintId')
+    .get((req, res, next) => {
+        Complaint.findById({ id: req.params.complaintId })
+            .populate('user')
+            .then((complaint) => {
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.json({ success: true, complaint })
+            });
+    })
+    .put((req, res, next) => {
+        Complaint.findByIdAndUpdate(req.params.complaintId, {
+            $set: req.body
+        }, {
+                new: true
+            })
+            .then((complaint) => {
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.json({ success: true, complaint, message: `Complaint of id: ${req.params.complaintId} is updated` })
+            });
+    });
 
 module.exports = complaintRouter;
