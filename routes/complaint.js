@@ -62,4 +62,21 @@ complaintRouter.route('/agent/:complaintId')
             });
     });
 
+// post - add comment to the post in question
+complaintRouter.route('/comment/:complaintId')
+    .post((req, res, next) => {
+        Complaint.findById({ id: req.params.complaintId })
+            .then((complaint) => {
+
+                complaint.comments.push(req.body);
+
+                complaint.save()
+                    .then((response) => {
+                        res.statusCode = 200;
+                        res.setHeader('Content-Type', 'application/json');
+                        res.json({ success: true, complaint: response, message: `Comment added` })
+                    });
+            });
+    });
+
 module.exports = complaintRouter;
